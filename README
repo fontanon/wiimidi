@@ -1,0 +1,6 @@
+Experiments with wiimote and midi based on rtmidi[1] and the pywiimote-hacks[2]
+
+This is a hardy-development repository
+
+[1] http://www.music.mcgill.ca/~gary/rtmidi/
+[2] http://github.com/rpl/python-wiimote-hacks/tree/master
