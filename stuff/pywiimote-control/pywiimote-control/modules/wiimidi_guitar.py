@@ -21,12 +21,15 @@ import math
 
 CHORD = 70
 MidiOut = None
-valor, control = 0, 0
+valor2, valor, control = 0, 0, 0
 
 NEW_AMOUNT = 0.1
 OLD_AMOUNT = 1 - NEW_AMOUNT
 
 acc = [0,0,0]
+max_roll, max_pitch, max_acc = 0,0,0
+min_roll, min_pitch, min_acc = 0,0,1
+old_valor2 = 0
 
 def init(zero, one):
     global MidiOut, acc_zero, acc_one
@@ -40,11 +43,14 @@ def close ():
     MidiOut.closePort()
 
 def callback(mesg):
-    def convert(value):
-        new = 127*(value+math.pi)/(2*math.pi)
+    def convert(value, factor, scale):
+        new = scale*(value+factor)/(2*factor)
         return int(new)
     
-    global MidiOut, control, valor, acc_zero, acc_one, acc
+    global MidiOut, control, valor, valor2, acc_zero, acc_one, acc
+    global max_roll, max_pitch, max_acc
+    global min_roll, min_pitch, min_acc
+    global old_valor2
 
     if MidiOut == None:
        return
@@ -82,8 +88,7 @@ def callback(mesg):
         acc = [NEW_AMOUNT*(new-zero)/(one-zero) + OLD_AMOUNT*old 
                 for old,new,zero,one in zip(acc,mesg[1],acc_zero,acc_one)]
         a = math.sqrt(sum(map(lambda x: x**2, acc)))
-        # Roll se calcula mal ... pega salto de 0.9 a 2.1
-        roll = 2.0 * (math.atan(acc[cwiid.X]/acc[cwiid.Z]) / math.pi)
+        roll = math.atan(acc[cwiid.X]/acc[cwiid.Z])
         if acc[cwiid.Z] <= 0:
             if acc[cwiid.X] > 0: roll += math.pi
             else: roll -= math.pi
@@ -95,8 +100,28 @@ def callback(mesg):
         print "roll: ", roll
         print "pitch: ", pitch
         """
+        #import pdb; pdb.set_trace()
+        if roll > max_roll: max_roll = roll
+        if pitch > max_pitch: max_pitch = pitch
+        if a > max_acc: max_acc = a
+ 
+        if roll < min_roll: min_roll = roll
+        if pitch < min_pitch: min_pitch = pitch
+        if a < min_acc: min_acc = a
         
-        valor = convert(roll)
+        valor = convert(roll, math.pi, 127)
+        valor2 = convert(pitch, 1.55, 16)
+        
+        """
+        print "CUR: ", a, roll, pitch
+        print "MAX: ", max_acc, max_roll, max_pitch
+        print "MIN: ", min_acc, min_roll, min_pitch
         print roll, valor
+        print pitch, valor2
+        """
         #MidiOut.sendMessage(0xB0, control, convert(valor))
         MidiOut.sendMessage(0xE0, 10, valor)
+        if valor2 != old_valor2:
+            print "cambio: ", old_valor2, valor2
+            MidiOut.sendMessage(0x90, valor2+100, 100)
+            old_valor2 = valor2
