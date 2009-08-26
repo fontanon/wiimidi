@@ -2,22 +2,27 @@
 
 import gtk
 from gtk import glade
+import exceptions
 import cwiid
 
 from wiimotecontroller import WiimoteDevice
 
 class WmGUI:
+    btn_on = gtk.gdk.color_parse('green')
+    btn_off = gtk.gdk.color_parse('grey')
+
     def __init__(self):
         self.wTree = glade.XML('wmgui.glade', None, None)
         dic = {'connectbutton_toggled_cb':self.connectbutton_toggled_cb,
-               'accdatacheck_toggled_cb':self.accdatacheck_toggled_cb,
-               'irdatacheck_toggled_cb':self.irdatacheck_toggled_cb,
-               'extensiondata_toggled_cb':self.extensiondata_toggled_cb,
+               'btncheck_toggled_cb':self.rptmode_toggled_cb,
+               'accdatacheck_toggled_cb':self.rptmode_toggled_cb,
+               'irdatacheck_toggled_cb':self.rptmode_toggled_cb,
+               'extensiondata_toggled_cb':self.rptmode_toggled_cb,
                'rumblecheck_toggled_cb':self.rumblecheck_toggled_cb,
-               'led1check_toggled_cb':self.led1check_toggled_cb,
-               'led2check_toggled_cb':self.led2check_toggled_cb,
-               'led3check_toggled_cb':self.led3check_toggled_cb,
-               'led4check_toggled_cb':self.led4check_toggled_cb}
+               'led1check_toggled_cb':self.calculate_led_cb,
+               'led2check_toggled_cb':self.calculate_led_cb,
+               'led3check_toggled_cb':self.calculate_led_cb,
+               'led4check_toggled_cb':self.calculate_led_cb}
         self.wTree.signal_autoconnect(dic)
         self.wTree.signal_connect('wmgui_window_destroy_cb', self.main_quit) 
         self.wTree.signal_connect('quitmenuitem_activate_cb', self.main_quit) 
@@ -25,6 +30,7 @@ class WmGUI:
         self.wmguiwindow = self.wTree.get_widget('wmguiwindow')
         self.connectbutton = self.wTree.get_widget('connectbutton')
 
+        self.btncheck = self.wTree.get_widget('btncheck')
         self.accdatacheck = self.wTree.get_widget('accdatacheck')
         self.irdatacheck = self.wTree.get_widget('irdatacheck')
         self.extensiondatacheck = self.wTree.get_widget('extensiondatacheck')
@@ -33,68 +39,96 @@ class WmGUI:
         self.led2check = self.wTree.get_widget('led2check')
         self.led3check = self.wTree.get_widget('led3check')
         self.led4check = self.wTree.get_widget('led4check')
+        self.upevbox = self.wTree.get_widget('upevbox')
+        self.downevbox = self.wTree.get_widget('downevbox')
+        self.leftevbox = self.wTree.get_widget('leftevbox')
+        self.rightevbox = self.wTree.get_widget('rightevbox')
+        self.abtnevbox = self.wTree.get_widget('abtnevbox')
+        self.bbtnevbox = self.wTree.get_widget('bbtnevbox')
+        self.minusevbox = self.wTree.get_widget('minusevbox')
+        self.homeevbox = self.wTree.get_widget('homeevbox')
+        self.plusevbox = self.wTree.get_widget('plusevbox')
+        self.oneevbox = self.wTree.get_widget('oneevbox')
+        self.twoevbox = self.wTree.get_widget('twoevbox')
 
         self.wiimote = WiimoteDevice()
-        self.wiimote.rptmode = cwiid.RPT_BTN
+        self.wiimote.rptmode=0
+        self.wiimote.connect('mesg_btn', self.btn_cb)
+        self.wiimote.connect('mesg_acc', self.acc_cb)
 
     def main_quit(self, obj):
         if self.wiimote.associated:
             self.wiimote.dissociate()
         gtk.main_quit()
 
-    def __set_sensible_ctrls(self, value=True):
-        self.accdatacheck.set_sensitive(value)
-        self.irdatacheck.set_sensitive(value)
-        self.extensiondatacheck.set_sensitive(value)
-        self.rumblecheck.set_sensitive(value)
-        self.led1check.set_sensitive(value)
-        self.led2check.set_sensitive(value)
-        self.led3check.set_sensitive(value)
-        self.led4check.set_sensitive(value)
-
     def connectbutton_toggled_cb(self, obj):
         if self.wiimote.associated:
             self.wiimote.dissociate()
         else:
-            msg = "Put Wiimote in discoverable mode now (press 1+2)"
-            dlg = gtk.MessageDialog(self.wmguiwindow, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO,
-                gtk.BUTTONS_NONE, msg)
+            msg = "Put Wiimote in discoverable mode (press 1+2) and close me"
+            dlg = gtk.MessageDialog(self.wmguiwindow, gtk.DIALOG_MODAL, 
+                    gtk.MESSAGE_INFO, gtk.BUTTONS_NONE, msg)
             dlg.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE)
             dlg.run()
 
             try:
                 self.wiimote.associate()
-                self.__set_sensible_ctrls(True)
-            except:
-                #FIXME: This callback the connectbutton_toggled_cb again!!
+            except exceptions.Exception, err:
+                #FIXME: I think there must be a better way to block handler
+                self.connectbutton.handler_block_by_func(self.connectbutton_toggled_cb)
                 self.connectbutton.set_active(False)
+                self.connectbutton.handler_unblock_by_func(self.connectbutton_toggled_cb)
+                errdlg = gtk.MessageDialog(self.wmguiwindow, gtk.DIALOG_MODAL, 
+                        gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, str(err.args))
+                errdlg.run()
+                errdlg.destroy()
             finally:
                 dlg.destroy()
 
-    def accdatacheck_toggled_cb(self, obj):
-        pass
+    def btn_cb(self, wiimote, mesg):
+        print mesg
+        self.upevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_UP) and self.btn_on or self.btn_off)
+        self.downevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_DOWN) and self.btn_on or self.btn_off)
+        self.leftevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_LEFT) and self.btn_on or self.btn_off)
+        self.rightevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_RIGHT) and self.btn_on or self.btn_off)
+        self.abtnevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_A) and self.btn_on or self.btn_off)
+        self.bbtnevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_B) and self.btn_on or self.btn_off)
+        self.minusevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_MINUS) and self.btn_on or self.btn_off)
+        self.homeevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_HOME) and self.btn_on or self.btn_off)
+        self.plusevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_PLUS) and self.btn_on or self.btn_off)
+        self.oneevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_1) and self.btn_on or self.btn_off)
+        self.twoevbox.modify_bg(gtk.STATE_NORMAL, 
+                (mesg & cwiid.BTN_2) and self.btn_on or self.btn_off)
+ 
+    def acc_cb(self, wiimote, mesg):
+        print mesg
 
-    def irdatacheck_toggled_cb(self, obj):
-        pass
+    def rptmode_toggled_cb(self, obj):
+        self.wiimote.rptmode = (self.btncheck.get_active() and cwiid.RPT_BTN) \
+                ^ (self.accdatacheck.get_active() and cwiid.RPT_ACC) \
+                ^ (self.irdatacheck.get_active() and cwiid.RPT_IR) \
+                ^ (self.extensiondatacheck.get_active() and cwiid.RPT_EXT)
 
-    def extensiondata_toggled_cb(self, obj):
-        pass
+    def calculate_led_cb(self, obj):
+        self.wiimote.led = ((self.led1check.get_active() and cwiid.LED1_ON) \
+                ^ (self.led2check.get_active() and cwiid.LED2_ON) \
+                ^ (self.led3check.get_active() and cwiid.LED3_ON) \
+                ^ (self.led4check.get_active() and cwiid.LED4_ON))
 
     def rumblecheck_toggled_cb(self, check):
         self.wiimote.rumble = check.get_active()
 
-    def led1check_toggled_cb(self, check):
-        self.wiimote.led = not check.get_active() or cwiid.LED1_ON
-
-    def led2check_toggled_cb(self, check):
-        self.wiimote.led = not check.get_active() or cwiid.LED2_ON
-
-    def led3check_toggled_cb(self, check):
-        self.wiimote.led = not check.get_active() or cwiid.LED3_ON
-
-    def led4check_toggled_cb(self, check):
-        self.wiimote.led = not check.get_active() or cwiid.LED4_ON
-
 if __name__ == '__main__':
-   wmgui = WmGUI()
-   gtk.main()
+    gtk.gdk.threads_init()
+    wmgui = WmGUI()
+    gtk.main()

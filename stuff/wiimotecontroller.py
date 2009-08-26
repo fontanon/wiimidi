@@ -13,6 +13,9 @@ LED = 0
 RUMBLE = False
 FLAG = cwiid.FLAG_MESG_IFC
 
+#FIXME: I think this is dangerous
+#gobject.threads_init()
+
 @simple_decorator
 def is_associated(func):
     def perform (self, *args, **kwargs):

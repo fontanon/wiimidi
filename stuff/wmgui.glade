@@ -112,7 +112,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="toggled" handler="connectbutton_toggled_cb"/>
+                    <signal name="toggled" handler="connectbutton_toggled_cb" after="yes"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -129,14 +129,13 @@
                       <widget class="GtkVButtonBox" id="vbuttonbox2">
                         <property name="visible">True</property>
                         <child>
-                          <widget class="GtkCheckButton" id="accdatacheck">
-                            <property name="label" translatable="yes">Acc Data</property>
+                          <widget class="GtkCheckButton" id="btncheck">
+                            <property name="label" translatable="yes">Buttons</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="accdatacheck_toggled_cb"/>
+                            <signal name="toggled" handler="btncheck_toggled_cb"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -145,14 +144,13 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkCheckButton" id="irdatacheck">
-                            <property name="label" translatable="yes">IR Data</property>
+                          <widget class="GtkCheckButton" id="accdatacheck">
+                            <property name="label" translatable="yes">Acc Data</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="irdatacheck_toggled_cb"/>
+                            <signal name="toggled" handler="accdatacheck_toggled_cb"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -161,10 +159,24 @@
                           </packing>
                         </child>
                         <child>
+                          <widget class="GtkCheckButton" id="irdatacheck">
+                            <property name="label" translatable="yes">IR Data</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                            <signal name="toggled" handler="irdatacheck_toggled_cb"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
                           <widget class="GtkCheckButton" id="extensiondatacheck">
                             <property name="label" translatable="yes">Extension Data</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
@@ -173,7 +185,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </widget>
@@ -204,7 +216,6 @@
                           <widget class="GtkCheckButton" id="rumblecheck">
                             <property name="label" translatable="yes">Rumble</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
@@ -220,9 +231,9 @@
                           <widget class="GtkCheckButton" id="led1check">
                             <property name="label" translatable="yes">LED1</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
+                            <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="led1check_toggled_cb"/>
                           </widget>
@@ -236,7 +247,6 @@
                           <widget class="GtkCheckButton" id="led2check">
                             <property name="label" translatable="yes">LED2</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
@@ -252,7 +262,6 @@
                           <widget class="GtkCheckButton" id="led3check">
                             <property name="label" translatable="yes">LED3</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
@@ -268,7 +277,6 @@
                           <widget class="GtkCheckButton" id="led4check">
                             <property name="label" translatable="yes">LED4</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
@@ -325,9 +333,14 @@
                                 <property name="n_rows">6</property>
                                 <property name="n_columns">3</property>
                                 <child>
-                                  <widget class="GtkLabel" id="upbtnlabel">
+                                  <widget class="GtkEventBox" id="upevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Up</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="upbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Up</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -335,9 +348,46 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="downbtnlabel">
+                                  <widget class="GtkEventBox" id="leftevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Down</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="leftbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Left</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="top_attach">1</property>
+                                    <property name="bottom_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkEventBox" id="rightevbox">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="rightbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Right</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="right_attach">3</property>
+                                    <property name="top_attach">1</property>
+                                    <property name="bottom_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkEventBox" id="downevbox">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="downbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Down</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -347,31 +397,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="leftbtnlabel">
+                                  <widget class="GtkEventBox" id="abtnevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Left</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="top_attach">1</property>
-                                    <property name="bottom_attach">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <widget class="GtkLabel" id="rightbtnlabel">
-                                    <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Right</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="left_attach">2</property>
-                                    <property name="right_attach">3</property>
-                                    <property name="top_attach">1</property>
-                                    <property name="bottom_attach">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <widget class="GtkLabel" id="abtnlabel">
-                                    <property name="visible">True</property>
-                                    <property name="label" translatable="yes">A</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="abtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">A</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="top_attach">3</property>
@@ -379,9 +412,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="bbtnlabel">
+                                  <widget class="GtkEventBox" id="bbtnevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">B</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="bbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">B</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -391,9 +429,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="minusbtnlabel">
+                                  <widget class="GtkEventBox" id="minusevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">-</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="minusbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">-</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="top_attach">4</property>
@@ -401,9 +444,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="homebtnlabel">
+                                  <widget class="GtkEventBox" id="homeevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Home</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="homebtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Home</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -413,9 +461,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="plusbtnlabel">
+                                  <widget class="GtkEventBox" id="plusevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">+</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="plusbtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">+</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -425,9 +478,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="onebtnlabel">
+                                  <widget class="GtkEventBox" id="oneevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">1</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="onebtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">1</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="top_attach">5</property>
@@ -435,9 +493,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkLabel" id="twobtnlabel">
+                                  <widget class="GtkEventBox" id="twoevbox">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">2</property>
+                                    <child>
+                                      <widget class="GtkLabel" id="twobtnlabel">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">2</property>
+                                      </widget>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="left_attach">2</property>
