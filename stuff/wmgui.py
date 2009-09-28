@@ -4,6 +4,7 @@ import gtk
 from gtk import glade
 import exceptions
 import cwiid
+import math
 
 from wiimotecontroller import WiimoteDevice
 
@@ -50,11 +51,15 @@ class WmGUI:
         self.plusevbox = self.wTree.get_widget('plusevbox')
         self.oneevbox = self.wTree.get_widget('oneevbox')
         self.twoevbox = self.wTree.get_widget('twoevbox')
+        self.progAccX = self.wTree.get_widget('progAccX')
+        self.progAccY = self.wTree.get_widget('progAccY')
+        self.progAccZ = self.wTree.get_widget('progAccZ')
 
         self.wiimote = WiimoteDevice()
-        self.wiimote.rptmode=0
+        self.wiimote.rptmode = 0
         self.wiimote.connect('mesg_btn', self.btn_cb)
         self.wiimote.connect('mesg_acc', self.acc_cb)
+
 
     def main_quit(self, obj):
         if self.wiimote.associated:
@@ -85,8 +90,11 @@ class WmGUI:
             finally:
                 dlg.destroy()
 
+        #FIXME: This sucks!
+        self.wm_cal_zero, self.wm_cal_one = self.wiimote.get_acc_cal(cwiid.EXT_NONE)
+
     def btn_cb(self, wiimote, mesg):
-        print mesg
+        gtk.gdk.threads_enter() #This prevent for gui crashes
         self.upevbox.modify_bg(gtk.STATE_NORMAL, 
                 (mesg & cwiid.BTN_UP) and self.btn_on or self.btn_off)
         self.downevbox.modify_bg(gtk.STATE_NORMAL, 
@@ -109,9 +117,33 @@ class WmGUI:
                 (mesg & cwiid.BTN_1) and self.btn_on or self.btn_off)
         self.twoevbox.modify_bg(gtk.STATE_NORMAL, 
                 (mesg & cwiid.BTN_2) and self.btn_on or self.btn_off)
- 
+        gtk.gdk.threads_leave() #This prevent for gui crashes
+
     def acc_cb(self, wiimote, mesg):
-        print mesg
+        gtk.gdk.threads_enter() #This prevent for gui crashes
+        self.progAccX.set_fraction(float(mesg[0])/0xFF)
+        self.progAccY.set_fraction(float(mesg[1])/0xFF)
+        self.progAccZ.set_fraction(float(mesg[2])/0xFF)
+        gtk.gdk.threads_leave() #This prevent for gui crashes
+
+        acc = [(float(mesg[i]) - self.wm_cal_zero[i]) /  \
+                (self.wm_cal_one[i] - self.wm_cal_zero[i]) \
+                for i in (cwiid.X, cwiid.Y, cwiid.Z)]
+
+        a = math.sqrt(sum(map(lambda x: x**2, acc)))
+
+        try:
+            roll = math.atan(acc[cwiid.X]/acc[cwiid.Z])
+        except:
+            print acc, mesg, self.wm_cal_zero
+
+        if acc[cwiid.Z] <= 0:
+            if acc[cwiid.X] > 0: 
+                roll += math.pi
+            else: 
+                roll -= math.pi
+
+        pitch = math.atan(acc[cwiid.Y]/acc[cwiid.Z]*math.cos(roll))
 
     def rptmode_toggled_cb(self, obj):
         self.wiimote.rptmode = (self.btncheck.get_active() and cwiid.RPT_BTN) \

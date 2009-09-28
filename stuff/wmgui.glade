@@ -625,7 +625,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkProgressBar" id="xmotionprogbar">
+                                      <widget class="GtkProgressBar" id="progAccX">
                                         <property name="visible">True</property>
                                       </widget>
                                       <packing>
@@ -634,7 +634,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkProgressBar" id="ymotionprogbar">
+                                      <widget class="GtkProgressBar" id="progAccY">
                                         <property name="visible">True</property>
                                       </widget>
                                       <packing>
@@ -645,7 +645,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkProgressBar" id="zmotionprogbar">
+                                      <widget class="GtkProgressBar" id="progAccZ">
                                         <property name="visible">True</property>
                                       </widget>
                                       <packing>
