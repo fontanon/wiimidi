@@ -1,0 +1,1 @@
+from wiimotecontroller import WiimoteDevice, CwiidLauncher

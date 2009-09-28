@@ -5,7 +5,7 @@ from gtk import glade
 import exceptions
 import cwiid
 
-from wiimotecontroller import WiimoteDevice
+from wiiasynclib import WiimoteDevice
 
 class test:
     btn_on = gtk.gdk.color_parse("green")

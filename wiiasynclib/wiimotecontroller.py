@@ -152,7 +152,7 @@ class WiimoteDevice(gobject.GObject):
                 self.emit('mesg_nunchuk', mesg[1])
             elif mesg[0] == cwiid.MESG_CLASSIC:
                 self.emit('mesg_classic', mesg[1])
-
+    
     #TODO: What a lot of proxies. Maybe i need another aprox.
     @is_associated
     def enable(self, flag):
@@ -211,16 +211,16 @@ if __name__ == '__main__':
 
     print 'Put Wiimote in discoverable mode now (press 1+2)'
     wii = WiimoteDevice()
-    wii.rptmode = cwiid.RPT_ACC
+    wii.rptmode = cwiid.RPT_BTN
     wii.led = cwiid.LED1_ON
     wii.rumble = True
-    #wii.connect('mesg_status', print_mesg, 'status: ')
+    wii.connect('mesg_status', print_mesg, 'status: ')
     wii.connect('mesg_acc', print_mesg, 'acc: ')
-    #wii.connect('mesg_btn', print_mesg, 'btn: ')
+    wii.connect('mesg_btn', print_mesg, 'btn: ')
     wii.connect('associated', associate_status)
     wii.associate()
 
-    #gobject.timeout_add(2000, stop_rumble, wii)
-    #gobject.timeout_add(5000, process_acc, wii)
-    #gobject.timeout_add(7000, stop, wii)
+    gobject.timeout_add(2000, stop_rumble, wii)
+    gobject.timeout_add(5000, process_acc, wii)
+    gobject.timeout_add(7000, stop, wii)
     gobject.MainLoop().run()

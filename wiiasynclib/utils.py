@@ -1,3 +1,5 @@
+# From http://wiki.python.org/moin/PythonDecoratorLibrary#CreatingWell-BehavedDecorators.2BAC8.22Decoratordecorator.22
+
 def simple_decorator(decorator):
     """This decorator can be used to turn simple functions
     into well-behaved decorators, so long as the decorators
@@ -20,4 +22,3 @@ def simple_decorator(decorator):
     new_decorator.__doc__ = decorator.__doc__
     new_decorator.__dict__.update(decorator.__dict__)
     return new_decorator
-

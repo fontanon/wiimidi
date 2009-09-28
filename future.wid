@@ -1,0 +1,36 @@
+Wiimote.A       = NOTE(Do7, 127) 
+Wiimote.B	    = NOTE(Mi,100)
+Wiimote.Up	    = NOTE_ON(Fa, 100)
+Wiimote.Down	= NOTE_OFF(Fa, 100)
+Wiimote.Left	= STOP_SONG
+Wiimote.Right	= CONTINUE
+Wiimote.Minus	= PROG_CHG-
+Wiimote.Plus	= PROG_CHG+
+Wiimote.Home	= START_SONG
+Wiimote.1		= CTRL_CHG+ 
+Wiimote.2		= CTRL_CHG-
+Wiimote.Roll(5)	= MODWHEEL(5,100)
+Wiimote.Pitch(7) = PITCHWHEEL(1,2)
+Wiimote.Acc(70) = WIIMOTE_CTRL_CHANGE?????
+
+Maybe:
+Wiimote.A       = SCALE((Do7, 127), (Mi, 100), (Fa, 127))
+Wiimote.Acc(70) = WIIMIDI_CHANGE_MAPPING
+Wiimote.A + Wiimote.B = NOTE_ON(La,100)
+
+Wiimote.A.Press = NOTE(Do, 100)
+Wiimote.A.Release = NOTE(Do, 100)
+Wiimote.A = NOTE(Do, 100)
+
+
+Grammar:
+program := program expression
+        | expression
+
+expression := ctrl '=' midicmd
+
+ctrl := WIIMOTE '.' WIIBUTTON
+      | NUNCHUK '.' NUNBUTTON
+      | CLASSIC '.' CLASSBTN
+
+midicmd := NOTE LPAREN NUMBER,NUMBER RPAREN
