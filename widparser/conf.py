@@ -11,6 +11,11 @@ translate = {
     'Nunchuk.C': cwiid.NUNCHUK_BTN_C,
 }
 
+translamidi = {
+    0x90: 'NOTE_ON',
+    0x80: 'NOTE_OFF',
+}
+
 class Conf():
 #    class ButtonMap:
 #        def __init__(self):
@@ -129,22 +134,37 @@ class NunchukButton(Button):
             return False
         return self.code == btn.code
 
-#TODO: Maybe a factory method it's requiered
+#TODO: Some kind of pattern may be applied
 class MidiMesg():
-    def __init__(self, status, byte1, byte2):
+    def __init__(self, status, data1, data2=None):
         self.status = status
-        self.byte1 = byte1
-        self.byte2 = byte2
+        self.data1 = data1
+        self.data2 = data2
+
+    @property
+    def reversible(self):
+        return False
 
     def __repr__(self):
-        return '%x, %d, %d' % (self.status, self.byte1, self.byte2)
+        return '%x, %d, %d' % (self.status, self.data1, self.data2)
 
-class Note(MidiMesg):
-    cmd = 0x90
-    not_cmd = 0x80
+class ReversibleMidiMesg(MidiMesg):
+    def __init__(self, status, data1, data2=None):
+        MidiMesg.__init__(self, status, data1, data2)
 
-    def __init__(self, key, velocity=127):
-        MidiMesg.__init__(self, self.cmd, key, velocity)
+    @property
+    def reversible(self):
+        return True
+        
+class Note(ReversibleMidiMesg):
+    def __init__(self, key, velocity=127, channel=0):
+        assert channel >=0 and channel < 15, 'Only 16 channel are available'
+        self.channel = channel
+        MidiMesg.__init__(self, 0x90+self.channel, key, velocity)
 
     def __neg__(self):
-        return MidiMesg(self.not_cmd, self.byte1, self.byte2)
+        return MidiMesg(0x80+self.channel, self.data1, self.data2)
+
+    def __repr__(self):
+        return '%s(%d, %d, %d)' % (translamidi[self.status], self.data1, 
+            self.data2, self.channel)

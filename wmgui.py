@@ -6,7 +6,7 @@ import exceptions
 import cwiid
 import math
 
-from wiimotecontroller import WiimoteDevice
+from wiiasynclib import WiimoteDevice
 
 class WmGUI:
     btn_on = gtk.gdk.color_parse('green')
@@ -134,16 +134,16 @@ class WmGUI:
 
         try:
             roll = math.atan(acc[cwiid.X]/acc[cwiid.Z])
+            if acc[cwiid.Z] <= 0:
+                if acc[cwiid.X] > 0: 
+                    roll += math.pi
+                else: 
+                    roll -= math.pi
+
+            pitch = math.atan(acc[cwiid.Y]/acc[cwiid.Z]*math.cos(roll))
         except:
+            #TODO: Why sometimes acc[2] it's zero ?
             print acc, mesg, self.wm_cal_zero
-
-        if acc[cwiid.Z] <= 0:
-            if acc[cwiid.X] > 0: 
-                roll += math.pi
-            else: 
-                roll -= math.pi
-
-        pitch = math.atan(acc[cwiid.Y]/acc[cwiid.Z]*math.cos(roll))
 
     def rptmode_toggled_cb(self, obj):
         self.wiimote.rptmode = (self.btncheck.get_active() and cwiid.RPT_BTN) \

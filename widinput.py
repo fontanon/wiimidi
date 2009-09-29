@@ -23,12 +23,12 @@ class WiiMidi():
             if self.is_pressed(btncode, mesg_btn, self.last['mesg_btn']) \
                     and button.press_action:
                 midi = button.get_press_action()
-                self.midiout.sendMessage(midi.status, midi.byte1, midi.byte2)
+                self.midiout.sendMessage(midi.status, midi.data1, midi.data2)
 
             elif self.is_released(btncode, mesg_btn, self.last['mesg_btn']) \
                     and button.release_action:
                 midi = button.get_release_action()
-                self.midiout.sendMessage(midi.status, midi.byte1, midi.byte2)
+                self.midiout.sendMessage(midi.status, midi.data1, midi.data2)
 
         self.last['mesg_btn'] = mesg_btn
 

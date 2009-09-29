@@ -99,7 +99,8 @@ class WidParser(Parser):
 
         if len(p) == 4:
             p[1].set_press_action(p[3])
-            p[1].set_release_action(-p[3])
+            if p[3].reversible:
+                p[1].set_release_action(-p[3])
         else:
             if p[3] == 'Press':
                 p[1].set_press_action(p[5])
@@ -125,9 +126,13 @@ class WidParser(Parser):
         p[0] = button
             
     def p_midicmd(self, p):
-        """ midicmd : NOTE '(' NUMBER ',' NUMBER ')' """
+        """ midicmd : NOTE '(' NUMBER ',' NUMBER ')' 
+                    | NOTE '(' NUMBER ',' NUMBER ',' NUMBER ')' """
         
-        p[0] = conf.Note(p[3], p[5])
+        if len(p) == 7:
+            p[0] = conf.Note(p[3], p[5])
+        else:
+            p[0] = conf.Note(p[3], p[5], p[7])
         
     def p_error(self, p):
         if p:
