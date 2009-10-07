@@ -4,11 +4,13 @@ from wiiasynclib import WiimoteDevice
 from widparser import WidParser
 from rtmidi import RtMidiOut
 
+MIDIPORT_NAME = 'WiiMidi'
+
 class WiiMidi():
     def __init__(self):
         self.last = {'mesg_btn': 0}
         self.midiout = RtMidiOut()
-        self.midiout.openVirtualPort('WiiMidi')
+        self.midiout.openVirtualPort(MIDIPORT_NAME)
         
     @staticmethod
     def is_pressed(btn, pressed, last_pressed):
@@ -23,12 +25,16 @@ class WiiMidi():
             if self.is_pressed(btncode, mesg_btn, self.last['mesg_btn']) \
                     and button.press_action:
                 midi = button.get_press_action()
-                self.midiout.sendMessage(midi.status, midi.data1, midi.data2)
+                data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
+                            if x])
+                self.midiout.sendMessage(*data)
 
             elif self.is_released(btncode, mesg_btn, self.last['mesg_btn']) \
                     and button.release_action:
                 midi = button.get_release_action()
-                self.midiout.sendMessage(midi.status, midi.data1, midi.data2)
+                data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
+                            if x])
+                self.midiout.sendMessage(*data)
 
         self.last['mesg_btn'] = mesg_btn
 

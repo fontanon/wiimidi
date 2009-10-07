@@ -21,16 +21,3 @@ Wiimote.A + Wiimote.B = NOTE_ON(La,100)
 Wiimote.A.Press = NOTE(Do, 100)
 Wiimote.A.Release = NOTE(Do, 100)
 Wiimote.A = NOTE(Do, 100)
-
-
-Grammar:
-program := program expression
-        | expression
-
-expression := ctrl '=' midicmd
-
-ctrl := WIIMOTE '.' WIIBUTTON
-      | NUNCHUK '.' NUNBUTTON
-      | CLASSIC '.' CLASSBTN
-
-midicmd := NOTE LPAREN NUMBER,NUMBER RPAREN

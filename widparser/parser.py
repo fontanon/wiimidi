@@ -3,6 +3,8 @@ import ply.yacc as yacc
 import os
 
 import conf
+import control
+import midimesg
 
 class Parser():
     """
@@ -50,7 +52,7 @@ class WidParser(Parser):
     tokens = (
         'COMMENT', 'NUMBER',
         'WIIMOTE', 'WIIBUTTON', 'NUNCHUK', 'NUNBUTTON', 'BTNEVENT',
-        'NOTE',
+        'NOTE', 'PROG_CHG'
         )
 
     t_WIIMOTE = r'Wiimote'
@@ -59,6 +61,7 @@ class WidParser(Parser):
     t_NUNBUTTON = r'C|Z'
     t_BTNEVENT = r'Press|Release'
     t_NOTE = r'NOTE'
+    t_PROG_CHG = r'PROG_CHG'
     t_ignore  = ' \t'
         
     def __init__(self):
@@ -115,25 +118,46 @@ class WidParser(Parser):
                    | NUNCHUK '.' NUNBUTTON """
 
         if p[1] == 'Wiimote':
-            button = conf.WiimoteButton(''.join(p[1:]))
+            button = control.WiimoteButton(''.join(p[1:]))
             if button in self.conf.wiimote_bmap.values():
                 button = self.conf.wiimote_bmap[button.code]
         elif p[1] == 'Nunchuk':
-            button = conf.NunchukButton(''.join(p[1:]))
+            button = control.NunchukButton(''.join(p[1:]))
             if button in self.conf.nunchuk_bmap.values():
                 button = self.conf.nunchuk_bmap[button.code]
                  
         p[0] = button
-            
+
     def p_midicmd(self, p):
-        """ midicmd : NOTE '(' NUMBER ',' NUMBER ')' 
-                    | NOTE '(' NUMBER ',' NUMBER ',' NUMBER ')' """
-        
-        if len(p) == 7:
-            p[0] = conf.Note(p[3], p[5])
+        """ midicmd : midimesg
+                    | midimesg '+' 
+                    | midimesg '-' 
+                    | midimesg '+' NUMBER
+                    | midimesg '-' NUMBER """
+                    
+        if len(p) == 2:
+            p[0] = p[1]
         else:
-            p[0] = conf.Note(p[3], p[5], p[7])
-        
+            step = 1
+            if len(p) == 4: step = p[3]
+            if p[2] == '-': step = -step
+            p[0] = midimesg.Data1Step(p[1], step)
+
+    def p_midimeg(self, p):
+        """ midimesg : PROG_CHG
+                    | PROG_CHG '(' NUMBER ')'
+                    | NOTE '(' NUMBER ',' NUMBER ')' 
+                    | NOTE '(' NUMBER ',' NUMBER ',' NUMBER ')' """
+                    
+        if len(p) == 2:
+            p[0] = midimesg.ProgChg(1)
+        elif len(p) == 5:
+            p[0] = midimesg.ProgChg(p[3])
+        elif len(p) == 7:
+            p[0] = midimesg.Note(p[3], p[5])
+        else:
+            p[0] = midimesg.Note(p[3], p[5], p[7])
+
     def p_error(self, p):
         if p:
             print "Syntax error at '%s'" % p.value
