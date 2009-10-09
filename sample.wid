@@ -1,6 +1,7 @@
-Wiimote.A.Press = NOTE(90,127)
-Wiimote.A.Release = NOTE(95,127,1)
-Wiimote.B = NOTE(100,127)
+#Wiimote.A.Press = NOTE(90,127)
+#Wiimote.A.Release = NOTE(95,127,1)
+#Wiimote.B = NOTE(100,127)
 Wiimote.Home = PROG_CHG+10
+(Wiimote.A + Wiimote.B).Press = NOTE(100, 127)
 Wiimote.Up = PROG_CHG(1)
-Nunchuk.C = NOTE(80,127)
+#Nunchuk.C = NOTE(80,127)

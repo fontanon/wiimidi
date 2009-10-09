@@ -97,8 +97,8 @@ class WidParser(Parser):
         p[0] = p[1]
                        
     def p_buttonassign(self, p):
-        """ buttonassign : button '=' midicmd
-                         | button '.' BTNEVENT '=' midicmd """
+        """ buttonassign : buttoncomb '=' midicmd
+                         | buttoncomb '.' BTNEVENT '=' midicmd """
 
         if len(p) == 4:
             p[1].set_press_action(p[3])
@@ -112,19 +112,31 @@ class WidParser(Parser):
 
         self.conf.add_btn(p[1])
         p[0] = p[1]
-        
+
+    def p_buttoncomb(self, p):
+        """ buttoncomb : '(' buttoncomb '+' button ')'
+                       | button """
+
+        if len(p) == 2:
+            #If button in conf then replace
+            if isinstance(p[1], control.WiimoteButton):
+                if p[1] in self.conf.wiimote_bmap.values():
+                    p[1] = self.conf.wiimote_bmap[p[1].btncode]
+            elif isinstance(p[1], control.NunchukButton):
+                if p[1] in self.conf.nunchuk_bmap.values():
+                    p[1] = self.conf.nunchuk_bmap[p[1].btncode]            
+            p[0] = p[1]
+        else:
+            p[0] = p[2] + p[4]
+              
     def p_button(self, p):
         """ button : WIIMOTE '.' WIIBUTTON
                    | NUNCHUK '.' NUNBUTTON """
 
         if p[1] == 'Wiimote':
             button = control.WiimoteButton(''.join(p[1:]))
-            if button in self.conf.wiimote_bmap.values():
-                button = self.conf.wiimote_bmap[button.code]
         elif p[1] == 'Nunchuk':
             button = control.NunchukButton(''.join(p[1:]))
-            if button in self.conf.nunchuk_bmap.values():
-                button = self.conf.nunchuk_bmap[button.code]
                  
         p[0] = button
 

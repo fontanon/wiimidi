@@ -11,20 +11,32 @@ translate = {
     'Nunchuk.C': cwiid.NUNCHUK_BTN_C,
 }
 
+
 class Button():
     codes = ()
     assert_mesg = 'No Button code'
     
-    def __init__(self, code=None):
-        btncode = translate[code]
-        assert btncode in self.codes, assert_mesg
-        self.code = btncode
+    def __init__(self, btncode):
+        if not type(btncode) == list:
+            self._code = [btncode]
+        #FIXME: better type checking it's needed
+        else:
+            self._code = btncode
+            
+        #TODO: Maybe a code this ala @property makes it clever
         self.press_action = None
         self.press_modif = lambda x, y: x
         self.press_modif_args = None
         self.release_action = None
         self.release_modif = lambda x, y: x
         self.release_modif_args = None
+        
+    @property
+    def btncode(self):
+        result = 0
+        for code in self._code:
+            result |= translate[code]
+        return result
 
     def set_press_action(self, action, func=lambda x, y: x, args=None):
         self.press_action = action
@@ -54,7 +66,7 @@ class Button():
 
     def __repr__(self):
         return 'btn:%s = Press %s(midi(%s), %s), Release %s(midi(%s), %s)' % \
-            (self.code, self.press_modif.__name__, repr(self.press_action), 
+            (self.btncode, self.press_modif.__name__, repr(self.press_action), 
                 self.press_modif_args, self.release_modif.__name__, 
                 repr(self.release_action), self.release_modif_args)
 
@@ -67,16 +79,22 @@ class WiimoteButton(Button):
     )
     assert_mesg = 'Not Wiimote Button code'
 
-    def __eq__(self, btn):
-        if not isinstance(btn, WiimoteButton): 
+    def __eq__(self, wiibtn):
+        if not isinstance(wiibtn, WiimoteButton): 
             return False
-        return self.code == btn.code
+        return self.btncode == wiibtn.btncode
+
+    def __add__(self, wiibtn):
+        if self == wiibtn:
+            return wiibtn
+        else:
+            return WiimoteButton(self._code + wiibtn._code)
 
 class NunchukButton(Button):
     codes = (cwiid.NUNCHUK_BTN_C, cwiid.NUNCHUK_BTN_Z)
     assert_mesg = 'Not Nunchuk Button code'
 
-    def __eq__(self, btn):
-        if not isinstance(btn, NunchukButton): 
+    def __eq__(self, nunbtn):
+        if not isinstance(nunbtn, NunchukButton): 
             return False
-        return self.code == btn.code
+        return self.code == nunbtn.code

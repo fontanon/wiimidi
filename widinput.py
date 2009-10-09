@@ -11,7 +11,7 @@ class WiiMidi():
         self.last = {'mesg_btn': 0}
         self.midiout = RtMidiOut()
         self.midiout.openVirtualPort(MIDIPORT_NAME)
-        
+    
     @staticmethod
     def is_pressed(btn, pressed, last_pressed):
          return btn & pressed and not btn & last_pressed
@@ -22,6 +22,7 @@ class WiiMidi():
 
     def process_btn(self, wiidevice, mesg_btn, btnmap):
         for btncode, button in btnmap.items():
+            #FIXME: This doesn't care about (Wiimote.A + Wiimote.B) combos
             if self.is_pressed(btncode, mesg_btn, self.last['mesg_btn']) \
                     and button.press_action:
                 midi = button.get_press_action()

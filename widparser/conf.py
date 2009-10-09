@@ -24,10 +24,10 @@ class Conf():
     def add_btn(self, btn):
         if isinstance(btn, WiimoteButton):
             self.rptmode |= cwiid.RPT_BTN
-            self.wiimote_bmap[btn.code] = btn
+            self.wiimote_bmap[btn.btncode] = btn
         elif isinstance(btn, NunchukButton):
             self.rptmode |= cwiid.RPT_NUNCHUK
-            self.nunchuk_bmap[btn.code] = btn
+            self.nunchuk_bmap[btn.btncode] = btn
             
     def add_axis(self, btn, action, func=lambda x, y: x, *args):
         pass
