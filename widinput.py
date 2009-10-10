@@ -21,17 +21,17 @@ class WiiMidi():
          return not btn & pressed and btn & last_pressed
 
     def process_btn(self, wiidevice, mesg_btn, btnmap):
-        for btncode, button in btnmap.items():
-            #FIXME: This doesn't care about (Wiimote.A + Wiimote.B) combos
-            if self.is_pressed(btncode, mesg_btn, self.last['mesg_btn']) \
-                    and button.press_action:
+        for button in btnmap.sensible_buttons(mesg_btn):
+            #FIXME: It can't process Wiimote.A + Wiimote.B at all!
+            if button.press_action and self.is_pressed(button.btncode, 
+                    mesg_btn, self.last['mesg_btn']):
                 midi = button.get_press_action()
                 data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
                             if x])
                 self.midiout.sendMessage(*data)
 
-            elif self.is_released(btncode, mesg_btn, self.last['mesg_btn']) \
-                    and button.release_action:
+            elif button.release_action and self.is_released(buttonbtncode, 
+                    mesg_btn, self.last['mesg_btn']):
                 midi = button.get_release_action()
                 data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
                             if x])

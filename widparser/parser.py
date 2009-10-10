@@ -118,13 +118,6 @@ class WidParser(Parser):
                        | button """
 
         if len(p) == 2:
-            #If button in conf then replace
-            if isinstance(p[1], control.WiimoteButton):
-                if p[1] in self.conf.wiimote_bmap.values():
-                    p[1] = self.conf.wiimote_bmap[p[1].btncode]
-            elif isinstance(p[1], control.NunchukButton):
-                if p[1] in self.conf.nunchuk_bmap.values():
-                    p[1] = self.conf.nunchuk_bmap[p[1].btncode]            
             p[0] = p[1]
         else:
             p[0] = p[2] + p[4]

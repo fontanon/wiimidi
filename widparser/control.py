@@ -11,6 +11,37 @@ translate = {
     'Nunchuk.C': cwiid.NUNCHUK_BTN_C,
 }
 
+class ButtonSet():
+    def __init__(self):
+        self.set = {}
+
+    def add(self, btn):
+        assert isinstance(btn, Button), 'Not Button instance'
+        self.set[btn.btncode] = btn
+
+    def remove(self, btn):
+        assert isinstance(btn, Button), 'Not Button instance'
+        del self.set[btn.btncode]
+
+    def sensible_buttons(self, mesg_btn):
+        #TODO: Maybe it's better a sorted insert on ButtonSet
+        sorted_btncodes = self.set.keys()
+        sorted_btncodes.sort()
+        sorted_btncodes.reverse()
+        
+        for btn in [self.set[btncode] for btncode in sorted_btncodes]:
+            if btn.btncode & mesg_btn:
+                mesg_btn -= btn.btncode
+                yield btn
+
+    def __iter__(self):
+        return self.set.values().__iter__()
+
+    def __contains__(self, btn):
+        return btn in self.set.values()
+
+    def __repr__(self):
+        return 'ButtonSet(%s)' % repr([repr(x) for x in self.set.values()])
 
 class Button():
     codes = ()
@@ -98,3 +129,23 @@ class NunchukButton(Button):
         if not isinstance(nunbtn, NunchukButton): 
             return False
         return self.code == nunbtn.code
+        
+if __name__ == '__main__':
+    from midimesg import Note
+    
+    a = WiimoteButton('Wiimote.A')
+    a.set_press_action(Note(90))
+    
+    b = WiimoteButton('Wiimote.B')
+    b.set_press_action(Note(100))
+    
+    ab = WiimoteButton('Wiimote.A') + WiimoteButton('Wiimote.B')
+    ab.set_press_action(Note(120))
+    
+    s = ButtonSet()
+    s.add(a)
+    s.add(b)
+    s.add(ab)
+    
+    for button in s.sensible_buttons(12):
+        print button
