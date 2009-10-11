@@ -15,3 +15,9 @@ class Conf():
         elif isinstance(btn, NunchukButton):
             self.rptmode |= cwiid.RPT_NUNCHUK
             self.nunchuk_bmap.add(btn)
+
+    def get_btn(self, btn):
+        for btnset in self.wiimote_bmap, self.nunchuk_bmap:
+            if btn in btnset:
+                return btnset[btn]
+        return False

@@ -2,46 +2,48 @@
 
 from wiiasynclib import WiimoteDevice
 from widparser import WidParser
+from widparser.control import ButtonSet
 from rtmidi import RtMidiOut
 
 MIDIPORT_NAME = 'WiiMidi'
 
 class WiiMidi():
     def __init__(self):
-        self.last = {'mesg_btn': 0}
+        self.last = {'wii_btn': ButtonSet()}
         self.midiout = RtMidiOut()
         self.midiout.openVirtualPort(MIDIPORT_NAME)
     
     @staticmethod
-    def is_pressed(btn, pressed, last_pressed):
-         return btn & pressed and not btn & last_pressed
+    def is_pressed(btncode, pressed):
+        return (btncode & pressed) == btncode
 
-    @staticmethod
-    def is_released(btn, pressed, last_pressed):
-         return not btn & pressed and btn & last_pressed
-
+    def send_midi(self, midi):
+        data = tuple([x for x in [midi.status, midi.data1, midi.data2] if x])
+        self.midiout.sendMessage(*data)
+    
     def process_btn(self, wiidevice, mesg_btn, btnmap):
-        for button in btnmap.sensible_buttons(mesg_btn):
-            #FIXME: It can't process Wiimote.A + Wiimote.B at all!
-            if button.press_action and self.is_pressed(button.btncode, 
-                    mesg_btn, self.last['mesg_btn']):
-                midi = button.get_press_action()
-                data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
-                            if x])
-                self.midiout.sendMessage(*data)
+        current = self.last['wii_btn']
+        
+        #Check for new pressed buttons and send the associated midi messages
+        for button in [btn for btn in btnmap.sensitive_buttons(mesg_btn) \
+                if not btn in self.last['wii_btn'] and \
+                self.is_pressed(btn.btncode, mesg_btn)]:
+            current.add(button)
+            if button.press_action:
+                self.send_midi(button.get_press_action())
 
-            elif button.release_action and self.is_released(buttonbtncode, 
-                    mesg_btn, self.last['mesg_btn']):
-                midi = button.get_release_action()
-                data = tuple([x for x in [midi.status, midi.data1, midi.data2] \
-                            if x])
-                self.midiout.sendMessage(*data)
-
-        self.last['mesg_btn'] = mesg_btn
-
+        #Check for new released buttons and send the associated midi messages
+        for button in [btn for btn in self.last['wii_btn'] \
+                if not self.is_pressed(btn.btncode, mesg_btn)]:
+            current.remove(button)
+            if button.release_action:
+                self.send_midi(button.get_release_action())
+       
+        self.last['wii_btn'] = current
+        
 if __name__ == '__main__':
     import sys
-
+    
     parser = WidParser()
     wiidevice = WiimoteDevice()
     wiimidi = WiiMidi()

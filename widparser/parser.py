@@ -122,10 +122,14 @@ class WidParser(Parser):
                        | button """
 
         if len(p) == 2:
-            p[0] = p[1]
+            button = self.conf.get_btn(p[1])
+            if button:
+                p[0] = button
+            else:
+                p[0] = p[1]
         else:
             p[0] = p[2] + p[4]
-              
+
     def p_button(self, p):
         """ button : WIIMOTE '.' WIIBUTTON
                    | NUNCHUK '.' NUNBUTTON """

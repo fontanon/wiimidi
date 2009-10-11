@@ -26,7 +26,7 @@ class MidiMesg():
         self.data2 = data2
         self.modif = lambda x, y: x
         self.args = None
-        
+
     @property
     def reversible(self):
         return False
@@ -52,7 +52,7 @@ class Note(ReversibleMidiMesg):
         return MidiMesg(0x80+self.channel, self.data1, self.data2)
 
     def __repr__(self):
-        return '%s(%d, %d, %d)' % (translate[self.status], self.data1, 
+        return '%s(%d, %d, %d)' % (translate[self.status-self.channel], self.data1, 
             self.data2, self.channel)
 
 class ProgChg(MidiMesg):

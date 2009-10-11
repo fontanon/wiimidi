@@ -23,22 +23,29 @@ class ButtonSet():
         assert isinstance(btn, Button), 'Not Button instance'
         del self.set[btn.btncode]
 
-    def sensible_buttons(self, mesg_btn):
+    def sensitive_buttons(self, mesg_btn):
+        """ Iterates filtering sensitive btns included in sensitive combos """
         #TODO: Maybe it's better a sorted insert on ButtonSet
         sorted_btncodes = self.set.keys()
         sorted_btncodes.sort()
         sorted_btncodes.reverse()
         
         for btn in [self.set[btncode] for btncode in sorted_btncodes]:
-            if btn.btncode & mesg_btn:
+            if (btn.btncode & mesg_btn) == btn.btncode:
                 mesg_btn -= btn.btncode
                 yield btn
+
+    def __getitem__(self, btn):
+        return self.set[btn.btncode]
 
     def __iter__(self):
         return self.set.values().__iter__()
 
     def __contains__(self, btn):
         return btn in self.set.values()
+
+    def __len__(self):
+        return len(self.set)
 
     def __repr__(self):
         return 'ButtonSet(%s)' % repr([repr(x) for x in self.set.values()])
@@ -116,6 +123,7 @@ class WiimoteButton(Button):
         return self.btncode == wiibtn.btncode
 
     def __add__(self, wiibtn):
+        """ Generates a combo wiimote button """
         if self == wiibtn:
             return wiibtn
         else:
