@@ -6,6 +6,10 @@ import conf
 import control
 import midimesg
 
+#This prevents ply's deprecated use of md5 instead of hashlib
+import warnings
+warnings.filterwarnings('ignore')
+
 class Parser():
     """
     Base class for a lexer/parser that has the rules defined as methods
@@ -50,7 +54,7 @@ class Parser():
 class WidParser(Parser):
     literals = '.,=()+'
     tokens = (
-        'COMMENT', 'NUMBER',
+        'NUMBER',
         'WIIMOTE', 'WIIBUTTON', 'NUNCHUK', 'NUNBUTTON', 'BTNEVENT',
         'NOTE', 'PROG_CHG'
         )
