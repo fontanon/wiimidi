@@ -4,7 +4,7 @@ translate = {
     'Wiimote.A': cwiid.BTN_A,
     'Wiimote.B': cwiid.BTN_B,
     'Wiimote.Left': cwiid.BTN_LEFT,
-    'Wiimote.Right':cwiid.BTN_LEFT,
+    'Wiimote.Right':cwiid.BTN_RIGHT,
     'Wiimote.Up': cwiid.BTN_UP,
     'Wiimote.Down': cwiid.BTN_DOWN,
     'Wiimote.Home': cwiid.BTN_HOME,
