@@ -56,6 +56,7 @@ class WidParser(Parser):
     tokens = (
         'NUMBER',
         'WIIMOTE', 'WIIBUTTON', 'NUNCHUK', 'NUNBUTTON', 'BTNEVENT',
+        'AXISEVENT',
         'NOTE', 'PROG_CHG'
         )
 
@@ -64,6 +65,7 @@ class WidParser(Parser):
     t_NUNCHUK = r'Nunchuk'
     t_NUNBUTTON = r'C|Z'
     t_BTNEVENT = r'Press|Release'
+    t_AXISEVENT = r'Roll|Pitch|Acc'
     t_NOTE = r'NOTE'
     t_PROG_CHG = r'PROG_CHG'
     t_ignore  = ' \t'
@@ -97,9 +99,26 @@ class WidParser(Parser):
 
     def p_expression(self, p):
         """ expression : buttonassign """
-        # | axisassign """
+                      #| axisassign"""
+
         p[0] = p[1]
-                       
+
+    """
+    def p_axisassign(self, p):
+        \""" axisassign : axis '=' midiwheel \"""
+        
+    def p_axis(self, p):
+        \""" axis : WIIMOTE '.' AXISEVENT
+                 | NUNCHUK '.' AXISEVENT \"""
+
+        if p[1] == 'Wiimote':
+            button = control.WiimoteAxis(''.join(p[1:]))
+        elif p[1] == 'Nunchuk':
+            button = control.NunchukAxis(''.join(p[1:]))
+                 
+        p[0] = button
+    """    
+    
     def p_buttonassign(self, p):
         """ buttonassign : buttoncomb '=' midicmd
                          | buttoncomb '.' BTNEVENT '=' midicmd """
