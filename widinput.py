@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import cwiid
 import math
 
 from wiiasynclib import WiimoteDevice
@@ -9,30 +8,6 @@ from widparser.control import ButtonSet
 from rtmidi import RtMidiOut
 
 MIDIPORT_NAME = 'WiiMidi'
-
-def get_acc(cal, mesg_acc):
-    cal_zero, cal_one = cal[0], cal[1]
-    
-    return [(float(mesg_acc[i]) - cal_zero[i]) / \
-        (cal_one[i] - cal_zero[i]) \
-        for i in (cwiid.X, cwiid.Y, cwiid.Z)]
-
-def get_roll(acc):
-    if acc[cwiid.Z] == 0:
-        acc[cwiid.Z] = 0.000000000001
-
-    roll = math.atan(acc[cwiid.X]/acc[cwiid.Z])
-        
-    if acc[cwiid.Z] <= 0:
-        if acc[cwiid.X] > 0: 
-            roll += math.pi
-        else: 
-            roll -= math.pi
-            
-    return roll
-
-def get_pitch(acc, roll):
-    return math.atan(acc[cwiid.Y]/acc[cwiid.Z]*math.cos(roll))  
 
 def convert(value, factor, scale):
     new = scale*(value+factor)/(2*factor)
@@ -72,25 +47,22 @@ class WiiMidi():
        
         self.last['wii_btn'] = current
 
-    def process_acc(self, wiidevice, mesg_acc, cal):
-        acc = get_acc(cal, mesg_acc)
-        a = math.sqrt(sum(map(lambda x: x**2, acc)))
-        roll = get_roll(acc)
-        pitch = get_pitch(acc, roll)
+    def process_acc(self, wiidevice, mesg_acc, axis):
+        axis.set_acc(mesg_acc)
         
-        roll2 = convert(roll, math.pi, 127)
-        pitch2 = convert(pitch, 1.55, 16)
+        roll = convert(axis.roll, math.pi, 127)
+        pitch = convert(axis.pitch, 1.55, 16)
         
-        if roll2 != self.last['roll']:
-            self.last['roll'] = roll2
-            self.midiout.sendMessage(0xE0, 10, convert(roll, math.pi, 127))        
+        if roll != self.last['roll']:
+            self.last['roll'] = roll
+            self.midiout.sendMessage(0xE0, 10, roll)
         
-        if pitch2 != self.last['pitch']:
-            #print pitch2
-            self.last['pitch'] = pitch2    
-                          
+        if pitch != self.last['pitch']:
+            self.last['pitch'] = pitch
+        
 if __name__ == '__main__':
     import sys
+    from widparser.control import Axis
     
     parser = WidParser()
     wiidevice = WiimoteDevice()
@@ -103,6 +75,7 @@ if __name__ == '__main__':
     
     wiidevice.rptmode = parser.conf.rptmode | 4
     calibration = wiidevice.get_acc_cal(0)
+    wiiaxis = Axis(calibration)
     
     wiidevice.connect('mesg_btn', wiimidi.process_btn, parser.conf.wiimote_bmap)
-    wiidevice.connect('mesg_acc', wiimidi.process_acc, calibration)
+    wiidevice.connect('mesg_acc', wiimidi.process_acc, wiiaxis)

@@ -1,4 +1,5 @@
 import cwiid
+import math
 
 translate = {
     'Wiimote.A': cwiid.BTN_A,
@@ -10,6 +11,42 @@ translate = {
     'Wiimote.Home': cwiid.BTN_HOME,
     'Nunchuk.C': cwiid.NUNCHUK_BTN_C,
 }
+
+AXIS_Z_COEF = 0.0000001
+
+class Borg():
+    __shared_state = {}
+    def __init__(self):
+        self.__dict__ = self.__shared_state
+        
+class Axis(Borg):
+    def __init__(self, calibration):
+        self.cal_one, self.cal_zero = calibration[0], calibration[1]
+        self.acc_x, self.acc_y, self.acc_z = 0, 0, 0
+        self.acc = [0,0,0]
+    
+    def set_acc(self, acc):
+        self.acc_x, self.acc_y, self.acc_z = acc
+
+        self.acc = [(float(acc[i]) - self.cal_zero[i]) / \
+            (self.cal_one[i] - self.cal_zero[i]) \
+            for i in (cwiid.X, cwiid.Y, cwiid.Z)]
+
+    @property
+    def roll(self):
+        roll = math.atan(self.acc[cwiid.X]/(self.acc[cwiid.Z] or AXIS_Z_COEF))
+            
+        if self.acc[cwiid.Z] <= 0:
+            if self.acc[cwiid.X] > 0: 
+                roll += math.pi
+            else: 
+                roll -= math.pi
+        return roll
+
+    @property
+    def pitch(self):        
+        return math.atan(self.acc[cwiid.Y]/(self.acc[cwiid.Z] or AXIS_Z_COEF) \
+            * math.cos(self.roll))
 
 class ButtonSet():
     def __init__(self):
