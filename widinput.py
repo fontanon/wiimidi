@@ -2,12 +2,14 @@
 
 import math
 
+import pypm
+
 from wiiasynclib import WiimoteDevice
 from widparser import WidParser
 from widparser.control import ButtonSet
-from rtmidi import RtMidiOut
 
-MIDIPORT_NAME = 'WiiMidi'
+
+LATENCY = 100
 
 def convert(value, factor, scale):
     new = scale*(value+factor)/(2*factor)
@@ -16,16 +18,15 @@ def convert(value, factor, scale):
 class WiiMidi():
     def __init__(self):
         self.last = {'wii_btn': ButtonSet(), 'roll': 0, 'pitch': 0}
-        self.midiout = RtMidiOut()
-        self.midiout.openVirtualPort(MIDIPORT_NAME)
-    
+        self.midiout = pypm.Output(pypm.GetDefaultOutputDeviceID(), LATENCY)
+
     @staticmethod
     def is_pressed(btncode, pressed):
         return (btncode & pressed) == btncode
 
     def send_midi(self, midi):
         data = tuple([x for x in [midi.status, midi.data1, midi.data2] if x])
-        self.midiout.sendMessage(*data)
+        self.midiout.WriteShort(*data)
     
     def process_btn(self, wiidevice, mesg_btn, btnmap):
         current = self.last['wii_btn']
@@ -62,8 +63,10 @@ class WiiMidi():
         
 if __name__ == '__main__':
     import sys
-    from widparser.control import Axis
+    #from widparser.control import Axis
     
+    pypm.Initialize()
+
     parser = WidParser()
     wiidevice = WiimoteDevice()
     wiimidi = WiiMidi()
@@ -74,8 +77,8 @@ if __name__ == '__main__':
     wiidevice.associate()
     
     wiidevice.rptmode = parser.conf.rptmode | 4
-    calibration = wiidevice.get_acc_cal(0)
-    wiiaxis = Axis(calibration)
+    #calibration = wiidevice.get_acc_cal(0)
+    #wiiaxis = Axis(calibration)
     
     wiidevice.connect('mesg_btn', wiimidi.process_btn, parser.conf.wiimote_bmap)
-    wiidevice.connect('mesg_acc', wiimidi.process_acc, wiiaxis)
+    #wiidevice.connect('mesg_acc', wiimidi.process_acc, wiiaxis)

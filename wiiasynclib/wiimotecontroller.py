@@ -131,7 +131,7 @@ class WiimoteDevice(gobject.GObject):
         self.__associated = False
         self.emit('associated', False)
 
-    def callback(self, mesg_list):
+    def callback(self, mesg_list, *data):
         self.emit('mesg_any', mesg_list)
 
         for mesg in mesg_list: 
